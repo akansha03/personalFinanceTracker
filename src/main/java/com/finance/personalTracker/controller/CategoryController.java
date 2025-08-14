@@ -17,7 +17,12 @@ public class CategoryController {
     }
 
     @GetMapping("/{type}")
-    public void retrieveCategoryByType(@PathVariable CategoryType type) {
+    public void getCategoryByType(@PathVariable CategoryType type) {
+        // Todo
+    }
+
+    @GetMapping("/")
+    public void getAllCategories() {
         // Todo
     }
 

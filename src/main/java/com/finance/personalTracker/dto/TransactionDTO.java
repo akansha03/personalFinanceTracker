@@ -3,27 +3,30 @@ package com.finance.personalTracker.dto;
 import com.finance.personalTracker.entity.Category;
 import com.finance.personalTracker.enums.Account;
 import com.finance.personalTracker.enums.CategoryType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
 import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class TransactionDTO {
 
-    private Double amount;
+    private UUID transactionId;
+
+    private LocalDateTime date;
+
+    private BigDecimal amount;
 
     private CategoryType type;
 
-    @ManyToOne
-    private Category categoryName;
+    private Category category;
 
-    @Enumerated(EnumType.STRING)
     private Account account;
 
     private String note;
 
-    private String image_url;
+    private String imageUrl;
 
     private String description;
 }
