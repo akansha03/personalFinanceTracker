@@ -7,8 +7,8 @@ import com.finance.personalTracker.enums.ExpenseCategory;
 import com.finance.personalTracker.enums.IncomeCategory;
 import com.finance.personalTracker.repositories.CategoryRepo;
 import com.finance.personalTracker.services.CategoryService;
+
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,15 +20,17 @@ import java.util.stream.Stream;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-    @Autowired
-    private CategoryRepo categoryRepo;
+    private final CategoryRepo categoryRepo;
+    private final ModelMapper modelMapper;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    public CategoryServiceImpl(CategoryRepo categoryRepo, ModelMapper modelMapper) {
+        this.categoryRepo = categoryRepo;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
-       Category category = modelMapper.map(categoryDTO, Category.class);
+       Category category = this.modelMapper.map(categoryDTO, Category.class);
        Category savedCategory = this.categoryRepo.save(category);
        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
@@ -57,12 +59,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     // Helper Methods Start Here
-
     private List<CategoryDTO> getDefaultCategories(CategoryType type) {
             return getEnumCategoryNames(type).stream()
-                    .map(name -> {
+                    .map(cname -> {
                         CategoryDTO categoryDTO = new CategoryDTO();
-                        categoryDTO.setName(name);
+                        categoryDTO.setName(cname);
                         categoryDTO.setType(type);
                         return categoryDTO;
                     }).toList();
@@ -78,6 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     // Generic Enum -> Names Extractor
+
     private List<String> getEnumCategoryNames(CategoryType type) {
         Class<? extends Enum<?>> enumClass =
                 (type == CategoryType.Income)

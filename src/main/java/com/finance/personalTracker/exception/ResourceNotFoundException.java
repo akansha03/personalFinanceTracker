@@ -1,10 +1,5 @@
 package com.finance.personalTracker.exception;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class ResourceNotFoundException extends RuntimeException {
 
     String resourceName;
@@ -16,5 +11,4 @@ public class ResourceNotFoundException extends RuntimeException {
         this.fieldName = fieldName;
 
     }
-
 }

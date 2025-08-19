@@ -4,6 +4,7 @@ import com.finance.personalTracker.dto.TransactionDTO;
 import com.finance.personalTracker.enums.CategoryType;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -15,5 +16,5 @@ public interface TransactionService {
 
     void deleteTransaction(UUID id);
 
-    BigDecimal getTotalAmount(LocalDateTime date, CategoryType type);
+    BigDecimal getTotalAmount(LocalDate date, CategoryType type);
 }

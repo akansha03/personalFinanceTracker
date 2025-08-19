@@ -1,7 +1,37 @@
-app:
-  datasource:
-    jdbc-url: jdbc:postgresql://localhost:5432/financeTracker
-    username: postgres
-    password: password
-    pool-size: 30
+spring:
+  application:
+    name: personal-tracker
 
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pfin
+    username: pfin_user
+    password: password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-test-query: SELECT 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      maximum-pool-size: 10
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+    show-sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    clean-disabled: true
+
+logging:
+  level:
+    org.flywaydb: DEBUG
+    org.springframework.boot.autoconfigure.flyway: DEBUG

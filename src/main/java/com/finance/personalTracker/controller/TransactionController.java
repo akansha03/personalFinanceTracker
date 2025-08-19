@@ -1,33 +1,49 @@
 package com.finance.personalTracker.controller;
 
 import com.finance.personalTracker.dto.TransactionDTO;
+import com.finance.personalTracker.enums.CategoryType;
+import com.finance.personalTracker.services.TransactionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/transactions")
 public class TransactionController {
 
-    @PostMapping("/income")
-    public void addIncome(@Valid @RequestBody TransactionDTO transactionDTO){
+    @Autowired
+    private TransactionService transactionService;
 
-
-    }
-
-    @PostMapping("/expense")
-    public void addExpense(@Valid @RequestBody TransactionDTO transactionDTO){
-
+    @PostMapping
+    public ResponseEntity<TransactionDTO> addTransaction(@Valid @RequestBody TransactionDTO transactionDTO) {
+        TransactionDTO newTransaction = this.transactionService.addTransaction(transactionDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newTransaction);
     }
 
     @PutMapping("/{uuid}")
-    public void updateIncome_Expense(@Valid @RequestBody TransactionDTO transactionDTO, Integer uuid){
-
+    public ResponseEntity<TransactionDTO> updateTransaction(@PathVariable UUID uuid,
+            @Valid @RequestBody TransactionDTO transactionDTO) {
+        TransactionDTO updateTransaction = this.transactionService.updateTransaction(transactionDTO, uuid);
+        return ResponseEntity.ok(updateTransaction);
     }
 
-    @GetMapping
-    public void getSummaryTransactions(@RequestParam String userID) {
-
+    @GetMapping("/total")
+    public ResponseEntity<BigDecimal> getAmount(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                          @RequestParam(value = "type", required = false) CategoryType type) {
+        BigDecimal amount = this.transactionService.getTotalAmount(date, type);
+        return new ResponseEntity<BigDecimal>(amount, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable UUID uuid) {
+        this.transactionService.deleteTransaction(uuid);
+        return ResponseEntity.noContent().build();
+    }
 }

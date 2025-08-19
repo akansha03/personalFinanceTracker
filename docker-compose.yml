@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    container_name: postgres-pfin
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pfin_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pfin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
