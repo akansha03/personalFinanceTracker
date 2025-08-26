@@ -1,21 +1,26 @@
 package com.finance.personalTracker.dto;
 
-import com.finance.personalTracker.entity.Category;
 import com.finance.personalTracker.enums.Account;
 import com.finance.personalTracker.enums.CategoryType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionDTO {
 
     private UUID transactionId;
 
     @NotNull(message = "Date cannot be null")
-    private LocalDateTime date;
+    private LocalDate date;
 
     @NotNull(message = "Amount cannot be null")
     @Positive(message = "Amount must be positive")
@@ -35,11 +40,11 @@ public class TransactionDTO {
 
     private String description;
 
-    public TransactionDTO() {
+    /*public TransactionDTO() {
     }
 
     public TransactionDTO(UUID transactionId,
-                          LocalDateTime date, BigDecimal amount, CategoryType type, String categoryName, Long categoryId,
+                          LocalDate date, BigDecimal amount, CategoryType type, String categoryName, Long categoryId,
                           Account account, String note, String imageUrl, String description) {
         this.transactionId = transactionId;
         this.date = date;
@@ -62,11 +67,11 @@ public class TransactionDTO {
         this.transactionId = transactionId;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -132,5 +137,5 @@ public class TransactionDTO {
 
     public void setDescription(String description) {
         this.description = description;
-    }
+    }*/
 }

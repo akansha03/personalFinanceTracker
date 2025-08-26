@@ -3,7 +3,6 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Categories
-
 CREATE TABLE IF NOT EXISTS categories (
   id          BIGSERIAL PRIMARY KEY,
   name        VARCHAR(100) NOT NULL,

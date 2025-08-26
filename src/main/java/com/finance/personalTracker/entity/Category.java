@@ -3,8 +3,10 @@ package com.finance.personalTracker.entity;
 import com.finance.personalTracker.enums.CategoryType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
+import lombok.Builder;
 
 @Entity
+@Builder
 @Table(name = "categories")
 public class Category {
 

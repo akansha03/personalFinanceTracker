@@ -1,6 +1,8 @@
 package com.finance.personalTracker.controller;
 
+import com.finance.personalTracker.dto.AmountDTO;
 import com.finance.personalTracker.dto.TransactionDTO;
+import com.finance.personalTracker.dto.UpdateTransactionDTO;
 import com.finance.personalTracker.enums.CategoryType;
 import com.finance.personalTracker.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +30,17 @@ public class TransactionController {
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<TransactionDTO> updateTransaction(@PathVariable UUID uuid,
-            @Valid @RequestBody TransactionDTO transactionDTO) {
-        TransactionDTO updateTransaction = this.transactionService.updateTransaction(transactionDTO, uuid);
+    public ResponseEntity<UpdateTransactionDTO> updateTransaction(@PathVariable UUID uuid,
+            @Valid @RequestBody UpdateTransactionDTO transactionDTO) {
+        UpdateTransactionDTO updateTransaction = this.transactionService.updateTransaction(transactionDTO, uuid);
         return ResponseEntity.ok(updateTransaction);
     }
 
     @GetMapping("/total")
-    public ResponseEntity<BigDecimal> getAmount(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                          @RequestParam(value = "type", required = false) CategoryType type) {
-        BigDecimal amount = this.transactionService.getTotalAmount(date, type);
-        return new ResponseEntity<BigDecimal>(amount, HttpStatus.OK);
+    public ResponseEntity<AmountDTO> getAmount(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                               @RequestParam(value = "type", required = false) CategoryType type) {
+        AmountDTO amount = this.transactionService.getTotalAmount(date, type);
+        return ResponseEntity.ok(amount);
     }
 
     @DeleteMapping("/{uuid}")

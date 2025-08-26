@@ -5,6 +5,8 @@ import com.finance.personalTracker.entity.Category;
 import com.finance.personalTracker.enums.CategoryType;
 import com.finance.personalTracker.enums.ExpenseCategory;
 import com.finance.personalTracker.enums.IncomeCategory;
+import com.finance.personalTracker.exception.BusinessValidationException;
+import com.finance.personalTracker.exception.DuplicateResourceException;
 import com.finance.personalTracker.repositories.CategoryRepo;
 import com.finance.personalTracker.services.CategoryService;
 
@@ -12,7 +14,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -30,15 +31,36 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+
+       validateBusinessRules(categoryDTO);
+       if(categoryExists(categoryDTO.getName(), categoryDTO.getType())) {
+           throw new DuplicateResourceException("Category with name '" + categoryDTO.getName()+
+                   "'and type" + categoryDTO.getType() + "'already exists");
+       }
        Category category = this.modelMapper.map(categoryDTO, Category.class);
        Category savedCategory = this.categoryRepo.save(category);
        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
 
+    private void validateBusinessRules(CategoryDTO categoryDTO) {
+        if(categoryDTO.getType() != null) {
+            if(categoryDTO.getType() != CategoryType.Income &&
+                    categoryDTO.getType() != CategoryType.Expense) {
+                throw new BusinessValidationException("Category type must be either Income " +
+                        "or Expense");
+            }
+        }
+    }
+
+    // Check that the category exists or not
+    private boolean categoryExists(String name, CategoryType type) {
+        return  categoryRepo.existsByNameAndType(name, type);
+    }
+
     @Override
     public List<CategoryDTO> getCategoriesByType(CategoryType type) {
         List<CategoryDTO> allCategories = new ArrayList<>();
-        allCategories.addAll(getDefaultCategories(type));
+        //allCategories.addAll(getDefaultCategories(type));
         allCategories.addAll(mapEntitiesToDTO(categoryRepo.findByType(type)));
         return allCategories;
     }
@@ -48,18 +70,22 @@ public class CategoryServiceImpl implements CategoryService {
 
         List<CategoryDTO> dbCategories = mapEntitiesToDTO(categoryRepo.findAll());
 
+        /* Commenting the code to get the default categories
         List<CategoryDTO> defaultCategories = Arrays.stream(CategoryType.values())
                 .flatMap(type -> getDefaultCategories(type).stream())
                 .toList();
+        */
 
         List<CategoryDTO> allCategories = new ArrayList<>();
         allCategories.addAll(dbCategories);
-        allCategories.addAll(defaultCategories);
+
+        //allCategories.addAll(defaultCategories);
         return allCategories;
     }
 
-    // Helper Methods Start Here
-    private List<CategoryDTO> getDefaultCategories(CategoryType type) {
+    // Helper Methods Start Here - Commenting the code to get the categories from the enum
+
+   /* private List<CategoryDTO> getDefaultCategories(CategoryType type) {
             return getEnumCategoryNames(type).stream()
                     .map(cname -> {
                         CategoryDTO categoryDTO = new CategoryDTO();
@@ -68,7 +94,7 @@ public class CategoryServiceImpl implements CategoryService {
                         return categoryDTO;
                     }).toList();
     }
-
+*/
     private List<CategoryDTO> mapEntitiesToDTO(List<Category> categories) {
         if(categories == null || categories.isEmpty()){
             return Collections.emptyList();

@@ -4,12 +4,15 @@ import com.finance.personalTracker.enums.Account;
 import com.finance.personalTracker.enums.CategoryType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
+import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Builder
 @Table(name = "transactions")
 public class Transaction {
 
@@ -19,7 +22,7 @@ public class Transaction {
     private UUID transactionId;
 
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Column(nullable = false)
     private BigDecimal amount;
@@ -61,7 +64,7 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(UUID transactionId, LocalDateTime date, BigDecimal amount,
+    public Transaction(UUID transactionId, LocalDate date, BigDecimal amount,
                        CategoryType type, Category category, Account account, String note,
                        String imageUrl, String description, LocalDateTime createdAt,
                        LocalDateTime updatedAt) {
@@ -86,11 +89,11 @@ public class Transaction {
         this.transactionId = transactionId;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

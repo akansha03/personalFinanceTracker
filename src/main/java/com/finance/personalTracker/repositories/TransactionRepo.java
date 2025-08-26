@@ -9,5 +9,9 @@ import java.util.*;
 
 public interface TransactionRepo extends JpaRepository<Transaction, UUID> {
 
+    Transaction findByTransactionId(UUID id);
+
     List<Transaction> findByDateAndType(LocalDate date, CategoryType type);
+
+    List<Transaction> findByCategoryType(CategoryType type);
 }
