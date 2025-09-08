@@ -1,4 +1,4 @@
-package com.finance.personalTracker.category;
+package com.finance.personalTracker.repository;
 
 import com.finance.personalTracker.entity.Category;
 import com.finance.personalTracker.enums.CategoryType;
@@ -55,7 +55,6 @@ public class CategoryRepositoryTests {
                 .name("Mobile Bills")
                 .type(CategoryType.Expense)
                 .build();
-
         categoryRepo.save(category);
         List<Category> result = categoryRepo.findByType(CategoryType.Expense);
         assertThat(result).isNotNull();
@@ -64,7 +63,6 @@ public class CategoryRepositoryTests {
 
     @Test
     void CategoryRepository_GetCategoryById_ReturnCategory() {
-
         Category category = Category.builder()
                 .name("Medicine Bills")
                 .type(CategoryType.Expense)
@@ -76,12 +74,10 @@ public class CategoryRepositoryTests {
 
     @Test
     void CategoryRepository_FindByNameAndType_ReturnNotNull() {
-
         Category category = Category.builder()
                 .name("Topmate")
                 .type(CategoryType.Income)
                 .build();
-
         categoryRepo.save(category);
         Category savedCategory = categoryRepo.
                 findByNameAndType(category.getName(), category.getType()).get();
@@ -90,33 +86,26 @@ public class CategoryRepositoryTests {
 
     @Test
     void CategoryRepository_UpdateCategory_ReturnNotNullCategory(){
-
         Category category = Category.builder()
                 .name("Topmate")
                 .type(CategoryType.Income)
                 .build();
-
         categoryRepo.save(category);
         Category savedCategory = categoryRepo.findById(category.getId()).get();
         savedCategory.setName("Freelancing");
-
         Category updatedCategory = categoryRepo.save(savedCategory);
         assertThat(updatedCategory).isNotNull();
     }
 
     @Test
     void CategoryRepository_DeleteCategoryById_ReturnCategoryIsEmpty() {
-
         Category category = Category.builder()
                 .name("Medicine Bills")
                 .type(CategoryType.Expense)
                 .build();
-
         categoryRepo.save(category);
         categoryRepo.deleteById(category.getId());
-
         Optional<Category> result = categoryRepo.findById(category.getId());
         assertThat(result).isEmpty();
     }
-
 }

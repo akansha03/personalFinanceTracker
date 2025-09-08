@@ -67,19 +67,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDTO> getAllCategories() {
-
         List<CategoryDTO> dbCategories = mapEntitiesToDTO(categoryRepo.findAll());
-
         /* Commenting the code to get the default categories
         List<CategoryDTO> defaultCategories = Arrays.stream(CategoryType.values())
                 .flatMap(type -> getDefaultCategories(type).stream())
                 .toList();
         */
-
         List<CategoryDTO> allCategories = new ArrayList<>();
         allCategories.addAll(dbCategories);
-
-        //allCategories.addAll(defaultCategories);
         return allCategories;
     }
 
@@ -105,7 +100,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     // Generic Enum -> Names Extractor
-
     private List<String> getEnumCategoryNames(CategoryType type) {
         Class<? extends Enum<?>> enumClass =
                 (type == CategoryType.Income)

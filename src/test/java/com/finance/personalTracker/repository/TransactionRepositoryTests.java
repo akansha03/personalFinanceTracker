@@ -1,4 +1,4 @@
-package com.finance.personalTracker.transaction;
+package com.finance.personalTracker.repository;
 
 import com.finance.personalTracker.entity.Category;
 import com.finance.personalTracker.entity.Transaction;
@@ -32,12 +32,9 @@ public class TransactionRepositoryTests {
 
         // Arrange Act Assert
 
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Brokerage");
-        category.setType(CategoryType.Income);
-
+        Category category = Category.builder().id(1L).name("Brokerage").type(CategoryType.Income).build();
         Category savedCategory = categoryRepo.save(category);
+
         Transaction transaction = Transaction.builder()
                 .date(LocalDate.now())
                 .amount(BigDecimal.valueOf(3000))
@@ -56,11 +53,7 @@ public class TransactionRepositoryTests {
     @Test
     void TransactionRepository_UpdateTransaction_ReturnUpdatedTransaction() {
 
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Vacation");
-        category.setType(CategoryType.Expense);
-
+        Category category = Category.builder().id(1L).name("Vacation").type(CategoryType.Expense).build();
         Category savedCategory = categoryRepo.save(category);
 
         Transaction transaction = Transaction.builder()
@@ -86,10 +79,7 @@ public class TransactionRepositoryTests {
     @Test
     void TransactionRepository_GetAll_ReturnAllTransactions() {
 
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Vacation");
-        category.setType(CategoryType.Expense);
+        Category category = Category.builder().id(1L).name("Vacation").type(CategoryType.Expense).build();
         Category savedCategory = categoryRepo.save(category);
 
         Transaction transaction1 = Transaction.builder()
@@ -124,9 +114,7 @@ public class TransactionRepositoryTests {
     @Test
     void TransactionRepository_GetTransactionByID_ReturnTransaction() {
 
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Vacation");
+        Category category = Category.builder().id(1L).name("Vacation").type(CategoryType.Expense).build();
         category.setType(CategoryType.Expense);
 
         Category savedCategory = categoryRepo.save(category);
@@ -150,18 +138,10 @@ public class TransactionRepositoryTests {
     @Test
     void TransactionRepository_FindAllTransactionByType_ReturnListOfTransactions() {
 
-        Category category1 = new Category();
-        category1.setId(1L);
-        category1.setName("Water Adventure");
-        category1.setType(CategoryType.Expense);
-
+        Category category1 = Category.builder().id(1L).name("Water Adventure").type(CategoryType.Expense).build();
         Category savedCategory1 = categoryRepo.save(category1);
 
-        Category category2 = new Category();
-        category2.setId(2L);
-        category2.setName("Rental Gears");
-        category2.setType(CategoryType.Income);
-
+        Category category2 = Category.builder().id(2L).name("Rental Gears").type(CategoryType.Income).build();
         Category savedCategory2 = categoryRepo.save(category2);
 
         Transaction transaction1 = Transaction.builder()
@@ -194,12 +174,9 @@ public class TransactionRepositoryTests {
     @Test
     void TransactionRepository_DeleteTransaction_ReturnTransactionIsEmpty() {
 
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Rental Gears");
-        category.setType(CategoryType.Income);
-
+        Category category = Category.builder().id(2L).name("Rental Gears").type(CategoryType.Income).build();
         Category savedCategory = categoryRepo.save(category);
+
         Transaction transaction = Transaction.builder()
                 .date(LocalDate.now())
                 .amount(BigDecimal.valueOf(1000))

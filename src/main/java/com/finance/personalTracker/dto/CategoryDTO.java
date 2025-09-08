@@ -5,10 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryDTO {
@@ -35,7 +37,6 @@ public class CategoryDTO {
                 ", type=" + type +
                 '}';
     }
-
    /* public @NotBlank @Size(min = 2, message = "Name of the category should not be more than 2") String getName() {
         return name;
     }
