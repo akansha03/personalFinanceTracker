@@ -6,13 +6,14 @@ import com.finance.personalTracker.dto.TransactionMapper;
 import com.finance.personalTracker.dto.UpdateTransactionDTO;
 import com.finance.personalTracker.entity.Category;
 import com.finance.personalTracker.entity.Transaction;
+
 import com.finance.personalTracker.enums.CategoryType;
 import com.finance.personalTracker.exception.ResourceNotFoundException;
 import com.finance.personalTracker.repositories.CategoryRepo;
 import com.finance.personalTracker.repositories.TransactionRepo;
 import com.finance.personalTracker.services.TransactionService;
-
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -92,12 +93,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public AmountDTO getTotalAmount(LocalDate date, CategoryType type) {
-
         if (type == null) {
             BigDecimal incomeTotal = getSum(mapEntitiesToDTO(transactionRepo.findByDateAndType(date, CategoryType.Income)));
             BigDecimal expenseTotal = getSum(mapEntitiesToDTO(transactionRepo.findByDateAndType(date, CategoryType.Expense)));
             return new AmountDTO(incomeTotal.subtract(expenseTotal));
         }
+
         List<TransactionDTO> transactions = mapEntitiesToDTO(transactionRepo.findByDateAndType(date, type));
         return new AmountDTO(getSum(transactions));
     }
@@ -119,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal::add)
                 .orElse(BigDecimal.ZERO);
-    }
+        }
 
   /*  private TransactionDTO convertToDTO(Transaction transaction) {
 
@@ -153,5 +154,5 @@ public class TransactionServiceImpl implements TransactionService {
         transactionDTO.setImageUrl(transaction.getImageUrl());
         transactionDTO.setDescription(transaction.getDescription());
         return transactionDTO;
-    }*/
+   }*/
 }
