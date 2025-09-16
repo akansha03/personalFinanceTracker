@@ -1,8 +1,6 @@
 package com.finance.personalTracker.controller;
 
-import com.finance.personalTracker.dto.AmountDTO;
-import com.finance.personalTracker.dto.TransactionDTO;
-import com.finance.personalTracker.dto.UpdateTransactionDTO;
+import com.finance.personalTracker.dto.*;
 import com.finance.personalTracker.enums.CategoryType;
 import com.finance.personalTracker.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +22,8 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping
-    public ResponseEntity<TransactionDTO> addTransaction(@Valid @RequestBody TransactionDTO transactionDTO) {
-        TransactionDTO newTransaction = this.transactionService.addTransaction(transactionDTO);
+    public ResponseEntity<TransactionResponseDTO> addTransaction(@Valid @RequestBody TransactionRequestDTO transactionDTO) {
+        TransactionResponseDTO newTransaction = this.transactionService.addTransaction(transactionDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(newTransaction);
     }
 

@@ -1,6 +1,5 @@
-version: "3.9"
 services:
-  db:
+  postgres:
     image: postgres:16
     container_name: postgres-pfin
     restart: always
@@ -12,5 +11,18 @@ services:
       POSTGRES_DB: pfin
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  app:
+    image: akanshadoc03/pfin:1.0.0
+    container_name: pfin-app
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pfin
+      SPRING_DATASOURCE_USERNAME: pfin_user
+      SPRING_DATASOURCE_PASSWORD: password
 volumes:
   postgres_data:

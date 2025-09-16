@@ -13,9 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,10 +31,8 @@ public class TransactionServiceImplTest {
 
     private TransactionServiceImpl transactionService;
 
-    private TransactionMapperImpl transactionMapper;
-
-    @Spy
-    private ModelMapper modelMapper;
+    @Mock
+    private TransactionMapper transactionMapper;
 
     @Mock
     private TransactionRepo transactionRepo;
@@ -44,20 +40,19 @@ public class TransactionServiceImplTest {
     @Mock
     private CategoryRepo categoryRepo;
 
-    private TransactionDTO transactionDTO;
-
+    private TransactionRequestDTO transactionDTO;
     private Category category;
+    private Transaction transaction;
 
     @BeforeEach
     void setUp() {
-        transactionMapper = new TransactionMapperImpl();
         transactionService = new TransactionServiceImpl(transactionRepo, transactionMapper, categoryRepo);
 
-        transactionDTO = TransactionDTO.builder()
+        transactionDTO = TransactionRequestDTO.builder()
                 .date(LocalDate.now())
                 .amount(BigDecimal.valueOf(5000))
                 .type(CategoryType.Expense)
-                .categoryId(1L)
+                .categoryName("PETS")
                 .account(Account.CASH)
                 .note("Dog Grooming")
                 .description("Monthly Dog Grooming")
@@ -69,32 +64,49 @@ public class TransactionServiceImplTest {
                 .type(CategoryType.Expense)
                 .build();
 
+        transaction = Transaction.builder()
+                .transactionId(UUID.randomUUID())
+                .date(LocalDate.now())
+                .amount(BigDecimal.valueOf(5000))
+                .type(CategoryType.Expense)
+                .category(category)
+                .account(Account.CASH)
+                .note("Golden Grooming Days")
+                .description("Monthly Grooming Days")
+                .build();
     }
 
     @Test
     void TransactionService_AddATransaction_ReturnTransactionDTO() {
 
         // Arrange
-        when(categoryRepo.findById(1L)).thenReturn(Optional.of(category));
-        when(transactionRepo.save(any(Transaction.class)))
-                .thenAnswer(invocation -> {
-                    Transaction transactionToSave = invocation.getArgument(0);
-                    if (transactionToSave.getTransactionId() == null) {
-                        transactionToSave.setTransactionId(UUID.randomUUID());
-                    }
-                    return transactionToSave;
-                });
+        TransactionResponseDTO expectedResponse = TransactionResponseDTO.builder()
+                .transactionId(transaction.getTransactionId())
+                .amount(transaction.getAmount())
+                .note(transaction.getNote())
+                .description(transaction.getDescription())
+                .account(transaction.getAccount())
+                .build();
+
+        when(transactionMapper.toEntity(transactionDTO)).thenReturn(transaction);
+        when(categoryRepo.findByNameAndType("PETS", CategoryType.Expense)).thenReturn(Optional.of(category));
+        when(transactionRepo.save(any(Transaction.class))).thenReturn(transaction);
+        when(transactionMapper.toResponseDTO(transaction)).thenReturn(expectedResponse);
 
         // Act
-        TransactionDTO result = transactionService.addTransaction(transactionDTO);
+        TransactionResponseDTO result = transactionService.addTransaction(transactionDTO);
 
-        // Assert
+        //Assert
         assertThat(result).isNotNull();
         assertThat(result.getAmount()).isEqualTo(BigDecimal.valueOf(5000));
-        assertThat(result.getNote()).isEqualTo("Dog Grooming");
-        assertThat(result.getDescription()).isEqualTo("Monthly Dog Grooming");
+        assertThat(result.getNote()).isEqualTo("Golden Grooming Days");
+        assertThat(result.getDescription()).isEqualTo("Monthly Grooming Days");
         assertThat(result.getAccount()).isEqualTo(Account.CASH);
-        assertThat(result.getType()).isEqualTo(CategoryType.Expense);
+
+        verify(transactionMapper).toEntity(transactionDTO);
+        verify(categoryRepo).findByNameAndType("PETS", CategoryType.Expense);
+        verify(transactionRepo).save(any(Transaction.class));
+        verify(transactionMapper).toResponseDTO(transaction);
     }
 
     @Test
@@ -121,25 +133,36 @@ public class TransactionServiceImplTest {
                 .description("Updated Description")
                 .build();
 
-        when(transactionRepo.findById(uuid)).thenReturn(Optional.of(existingTransaction));
-        when(transactionRepo.save(any(Transaction.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        UpdateTransactionDTO expectedResponse = UpdateTransactionDTO.builder()
+                        .amount(BigDecimal.valueOf(3000))
+                        .account(Account.BANK_ACCOUNTS)
+                        .note("Update Note")
+                        .imageUrl("image.png")
+                        .description("Updated Description")
+                        .build();
 
+        when(transactionRepo.findById(uuid)).thenReturn(Optional.of(existingTransaction));
+        when(transactionRepo.save(any(Transaction.class))).thenReturn(existingTransaction);
+        when(transactionMapper.toUpdateDTO(existingTransaction)).thenReturn(expectedResponse);
+
+        // Act
         UpdateTransactionDTO result = transactionService.updateTransaction(updateTransactionDTO, uuid);
 
+        //Assert
         assertThat(result).isNotNull();
         assertThat(result.getAmount()).isEqualTo(BigDecimal.valueOf(3000));
         assertThat(result.getAccount()).isEqualTo(Account.BANK_ACCOUNTS);
-
         assertThat(result.getNote()).isEqualTo("Update Note");
         assertThat(result.getDescription()).isEqualTo("Updated Description");
 
         verify(transactionRepo).findById(uuid);
         verify(transactionRepo).save(existingTransaction);
+        verify(transactionMapper).toUpdateDTO(existingTransaction);
     }
 
     @Test
     void TransactionService_DeleteTransaction_ReturnNull() {
+        // Arrange
 
         UUID uuid = UUID.randomUUID();
         Transaction existingTransaction = Transaction.builder()
@@ -154,8 +177,10 @@ public class TransactionServiceImplTest {
                 .build();
 
         when(transactionRepo.findById(uuid)).thenReturn(Optional.of(existingTransaction));
+        // Act
         transactionService.deleteTransaction(uuid);
 
+        // Assert
         verify(transactionRepo).findById(uuid);
         verify(transactionRepo).delete(existingTransaction);
     }
@@ -176,8 +201,22 @@ public class TransactionServiceImplTest {
                 .date(date)
                 .build();
 
+        TransactionDTO incomeDTO = TransactionDTO.builder()
+                .amount(BigDecimal.valueOf(1000))
+                .type(CategoryType.Income)
+                .date(date)
+                .build();
+
+        TransactionDTO expenseDTO = TransactionDTO.builder()
+                .amount(BigDecimal.valueOf(600))
+                .type(CategoryType.Expense)
+                .date(date)
+                .build();
+
         when(transactionRepo.findByDateAndType(date, CategoryType.Income)).thenReturn(List.of(income));
         when(transactionRepo.findByDateAndType(date, CategoryType.Expense)).thenReturn(List.of(expense));
+        when(transactionMapper.toDTO(expense)).thenReturn(expenseDTO);
+        when(transactionMapper.toDTO(income)).thenReturn(incomeDTO);
 
         AmountDTO result = transactionService.getTotalAmount(date, null);
         assertThat(result).isNotNull();
@@ -194,9 +233,19 @@ public class TransactionServiceImplTest {
                 .date(date)
                 .build();
 
-        when(transactionRepo.findByDateAndType(date, CategoryType.Income)).thenReturn(List.of(income));
+        TransactionDTO incomeDTO = TransactionDTO.builder()
+                .amount(BigDecimal.valueOf(1000))
+                .type(CategoryType.Income)
+                .date(date)
+                .build();
 
+        when(transactionRepo.findByDateAndType(date, CategoryType.Income)).thenReturn(List.of(income));
+        when(transactionMapper.toDTO(income)).thenReturn(incomeDTO);
+
+        // Act
         AmountDTO result = transactionService.getTotalAmount(date, CategoryType.Income);
+
+        // Assert
         assertThat(result).isNotNull();
         assertThat(result.getAmount()).isEqualTo(BigDecimal.valueOf(1000));
     }
@@ -204,18 +253,29 @@ public class TransactionServiceImplTest {
     @Test
     void TransactionService_GetTotalAmount_WhenTypeExpense_ReturnExpenseTotal() {
 
+        // Arrange
         LocalDate date = LocalDate.now();
-
         Transaction expense = Transaction.builder()
                 .amount(BigDecimal.valueOf(1000))
                 .type(CategoryType.Expense)
                 .date(date)
                 .build();
 
+        TransactionDTO expenseDTO = TransactionDTO.builder()
+                .amount(BigDecimal.valueOf(1000))
+                .type(CategoryType.Expense)
+                .date(date)
+                .build();
+
         when(transactionRepo.findByDateAndType(date, CategoryType.Expense)).thenReturn(List.of(expense));
+        when(transactionMapper.toDTO(expense)).thenReturn(expenseDTO);
+        // Act
         AmountDTO result = transactionService.getTotalAmount(date, CategoryType.Expense);
+
+        // Assert
         assertThat(result).isNotNull();
         assertThat(result.getAmount()).isEqualTo(BigDecimal.valueOf(1000));
     }
 
 }
+

@@ -1,9 +1,7 @@
 package com.finance.personalTracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.finance.personalTracker.dto.AmountDTO;
-import com.finance.personalTracker.dto.TransactionDTO;
-import com.finance.personalTracker.dto.UpdateTransactionDTO;
+import com.finance.personalTracker.dto.*;
 import com.finance.personalTracker.enums.Account;
 import com.finance.personalTracker.enums.CategoryType;
 import com.finance.personalTracker.services.TransactionService;
@@ -23,6 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,19 +44,17 @@ public class TransactionControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private TransactionDTO transactionDTO;
+    private TransactionRequestDTO transactionDTO;
 
     private UpdateTransactionDTO updateTransactionDTO;
 
     @BeforeEach
     public void init() {
-        transactionDTO = TransactionDTO.builder()
-                .transactionId(UUID.randomUUID())
+        transactionDTO = TransactionRequestDTO.builder()
                 .date(LocalDate.now())
                 .amount(BigDecimal.valueOf(5000))
                 .type(CategoryType.Income)
                 .categoryName("Salary")
-                .categoryId(1L)
                 .account(Account.BANK_ACCOUNTS)
                 .note("Update Note")
                 .imageUrl("image.png")
@@ -74,16 +71,34 @@ public class TransactionControllerTests {
     @Test
     void TransactionController_AddTransaction_ReturnTransactionDTO() throws Exception {
 
-        given(transactionService.addTransaction(ArgumentMatchers.any()))
-                .willAnswer(invocation -> invocation.getArgument(0));
+        TransactionResponseDTO responseDTO = TransactionResponseDTO.builder()
+                .transactionId(UUID.randomUUID())
+                .date(transactionDTO.getDate())
+                .amount(transactionDTO.getAmount())
+                .categoryDTO(
+                        CategoryResponseDTO.builder()
+                                .id(1L)
+                                .name(transactionDTO.getCategoryName())
+                                .type(transactionDTO.getType())
+                                .build()
+                )
+                .account(transactionDTO.getAccount())
+                .note(transactionDTO.getNote())
+                .imageUrl(transactionDTO.getImageUrl())
+                .description(transactionDTO.getDescription())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        given(transactionService.addTransaction(any(TransactionRequestDTO.class)))
+                .willReturn(responseDTO);
 
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post("/api/transactions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(transactionDTO)));
 
         result.andExpect(status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.type", CoreMatchers.is(CategoryType.Income.toString())));
-
+                .andExpect(MockMvcResultMatchers.jsonPath("$.categoryDTO.type", CoreMatchers.is(CategoryType.Income.toString())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.categoryDTO.name", CoreMatchers.is("Salary")));
     }
 
     @Test
