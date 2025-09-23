@@ -3,8 +3,6 @@ package com.finance.personalTracker.dto;
 import com.finance.personalTracker.entity.Transaction;
 import org.mapstruct.Mapper;
 
-import java.math.BigDecimal;
-
 @Mapper(componentModel = "spring")
 public interface TransactionMapper {
 
@@ -12,6 +10,8 @@ public interface TransactionMapper {
 
     UpdateTransactionDTO toUpdateDTO(Transaction transaction);
 
-    Transaction toEntity(TransactionDTO dto);
+    Transaction toEntity(TransactionRequestDTO dto);
+
+    TransactionResponseDTO toResponseDTO(Transaction transaction);
 
 }

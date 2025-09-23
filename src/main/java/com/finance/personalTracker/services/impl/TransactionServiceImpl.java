@@ -1,9 +1,6 @@
 package com.finance.personalTracker.services.impl;
 
-import com.finance.personalTracker.dto.AmountDTO;
-import com.finance.personalTracker.dto.TransactionDTO;
-import com.finance.personalTracker.dto.TransactionMapper;
-import com.finance.personalTracker.dto.UpdateTransactionDTO;
+import com.finance.personalTracker.dto.*;
 import com.finance.personalTracker.entity.Category;
 import com.finance.personalTracker.entity.Transaction;
 
@@ -37,34 +34,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionDTO addTransaction(TransactionDTO transactionDTO) {
-
-       /* Transaction transaction = new Transaction();
-
-        transaction.setDate(transactionDTO.getDate());
-        transaction.setAmount(transactionDTO.getAmount());
-        transaction.setType(transactionDTO.getType());
-
-        transaction.setAccount(transactionDTO.getAccount());
-        transaction.setNote(transactionDTO.getNote());
-        transaction.setImageUrl(transactionDTO.getImageUrl());
-        transaction.setDescription(transactionDTO.getDescription());*/
+    public TransactionResponseDTO addTransaction(TransactionRequestDTO transactionDTO) {
 
         Transaction transaction = transactionMapper.toEntity(transactionDTO);
-
-        if (transactionDTO.getCategoryId() != null) {
-            Category category = categoryRepo.findById(transactionDTO.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", transactionDTO.getCategoryId().toString()));
-            transaction.setCategory(category);
-        } else if (transactionDTO.getCategoryName() != null) {
-            Category category = categoryRepo.findByNameAndType(transactionDTO.getCategoryName(),
-                    transactionDTO.getType()).orElseThrow(() -> new ResourceNotFoundException("Category", transactionDTO.getCategoryName()));
-            transaction.setCategory(category);
-        } else {
-            throw new IllegalArgumentException("Either categoryId or categoryName should be provided");
-        }
-        Transaction savedTransaction = this.transactionRepo.save(transaction);
-        return transactionMapper.toDTO(savedTransaction);
+        Category category = categoryRepo.findByNameAndType(transactionDTO.getCategoryName(),
+                transactionDTO.getType()).orElseThrow(() -> new ResourceNotFoundException("Category", transactionDTO.getCategoryName()));
+        transaction.setCategory(category);
+        Transaction savedTransaction = transactionRepo.save(transaction);
+        return transactionMapper.toResponseDTO(savedTransaction);
     }
 
     @Override
@@ -121,38 +98,4 @@ public class TransactionServiceImpl implements TransactionService {
                 .reduce(BigDecimal::add)
                 .orElse(BigDecimal.ZERO);
         }
-
-  /*  private TransactionDTO convertToDTO(Transaction transaction) {
-
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setTransactionId(transaction.getTransactionId());
-        transactionDTO.setDate(transaction.getDate());
-        transactionDTO.setAmount(transaction.getAmount());
-        transactionDTO.setType(transaction.getType());
-
-        transactionDTO.setAccount(transaction.getAccount());
-        transactionDTO.setNote(transaction.getNote());
-        transactionDTO.setImageUrl(transaction.getImageUrl());
-        transactionDTO.setDescription(transaction.getDescription());
-
-        if (transaction.getCategory() != null) {
-            transactionDTO.setId(transaction.getCategory().getId());
-            transactionDTO.setCategoryName(transaction.getCategory().getName());
-        }
-
-        return transactionDTO;
-    }
-
-    private UpdateTransactionDTO convertToUpdateDTO(Transaction transaction) {
-
-        UpdateTransactionDTO transactionDTO = new UpdateTransactionDTO();
-        transactionDTO.setAmount(transaction.getAmount());
-
-        transactionDTO.setAccount(transaction.getAccount());
-        transactionDTO.setNote(transaction.getNote());
-
-        transactionDTO.setImageUrl(transaction.getImageUrl());
-        transactionDTO.setDescription(transaction.getDescription());
-        return transactionDTO;
-   }*/
 }

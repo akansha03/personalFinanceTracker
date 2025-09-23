@@ -219,52 +219,262 @@ The application uses PostgreSQL with Flyway migrations for database schema manag
 - **Data Validation**: Amount must be non-negative, types are constrained to 'Income'/'Expense'
 - **Indexes**: Optimized queries with indexes on date, type, and category_id
 
-## 🛠️ How to Run Locally
+## 🛠️ Setup and Running Instructions
 
 ### Prerequisites
-- JDK 17 or higher
-- Maven 3.6+
-- PostgreSQL 16 or Docker
+- **Java**: JDK 17 (required)
+- **Maven**: 3.6+ 
+- **Docker**: For database or full containerized setup
+- **PostgreSQL**: 16+ (if running database locally)
 
-### Option 1: Using Docker (Recommended)
+### 🚀 Quick Start (Recommended)
 
-1. **Start PostgreSQL Database:**
+#### Option 1: Full Docker Setup (Easiest)
+
+Run everything with Docker - both database and application:
+
+```bash
+# Clone and navigate to project
+git clone <repository-url>
+cd personalTracker
+
+# Start everything with Docker
+docker-compose up
+
+# Application will be available at http://localhost:8080
+```
+
+#### Option 2: Local Development Setup
+
+For local development with Docker database:
+
+```bash
+# 1. Setup Java 17 environment (macOS with Homebrew)
+brew install openjdk@17
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+
+# 2. Start PostgreSQL database only
+docker-compose up -d db
+
+# 3. Run the application locally
+mvn clean compile
+mvn spring-boot:run
+
+# Application will be available at http://localhost:8080
+```
+
+**Or use the provided setup script:**
+```bash
+# Make script executable
+chmod +x setup-local.sh
+
+# Run setup script
+./setup-local.sh
+
+# Then run the application
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+mvn spring-boot:run
+```
+
+### 🔧 Detailed Setup Instructions
+
+#### Java 17 Setup
+
+**macOS (using Homebrew):**
+```bash
+# Install Java 17
+brew install openjdk@17
+
+# Set environment variables (add to ~/.zshrc for persistence)
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+
+# Verify installation
+java -version
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+# Install OpenJDK 17
+sudo apt update
+sudo apt install openjdk-17-jdk
+
+# Set JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+**Windows:**
+1. Download OpenJDK 17 from [Adoptium](https://adoptium.net/)
+2. Install and set `JAVA_HOME` environment variable
+3. Add `%JAVA_HOME%\bin` to your PATH
+
+#### Database Setup Options
+
+**Option A: Docker Database (Recommended for Development)**
+```bash
+# Start PostgreSQL container
+docker-compose up -d db
+
+# Verify database is running
+docker exec postgres-pfin psql -U pfin_user -d pfin -c "SELECT 1;"
+```
+
+**Option B: Local PostgreSQL Installation**
+```bash
+# Install PostgreSQL (macOS)
+brew install postgresql@16
+brew services start postgresql@16
+
+# Create database and user
+psql postgres
+CREATE DATABASE pfin;
+CREATE USER pfin_user WITH PASSWORD 'password';
+GRANT ALL PRIVILEGES ON DATABASE pfin TO pfin_user;
+\q
+```
+
+### 📁 Configuration Files
+
+The project uses Spring profiles for different environments:
+
+- **`application.yml`** - Default configuration (uses local profile)
+- **`application-local.yml`** - Local development configuration
+- **`application-docker.yml`** - Docker environment configuration
+
+#### Local Development Configuration
+```yaml
+# application-local.yml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pfin
+    username: pfin_user
+    password: password
+```
+
+#### Docker Configuration
+```yaml
+# application-docker.yml  
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/pfin
+    username: pfin_user
+    password: password
+```
+
+### 🏃‍♂️ Running the Application
+
+#### Local Development
+```bash
+# Set Java 17 environment
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+
+# Start database
+docker-compose up -d db
+
+# Run application
+mvn spring-boot:run
+
+# Or run with specific profile
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+#### Docker Deployment
+```bash
+# Build and run everything
+docker-compose up --build
+
+# Or run in background
+docker-compose up -d
+```
+
+#### Production Build
+```bash
+# Build JAR file
+mvn clean package
+
+# Run JAR
+java -jar target/personalFinanceTracker-0.0.1-SNAPSHOT.jar
+```
+
+### 🔍 Verifying Setup
+
+1. **Check Application Health:**
    ```bash
-   docker-compose up -d
+   curl http://localhost:8080/actuator/health
    ```
 
-2. **Build and Run the Application:**
+2. **Test Categories API:**
    ```bash
-   mvn clean install
-   mvn spring-boot:run
+   curl http://localhost:8080/api/categories
    ```
 
-### Option 2: Local PostgreSQL Setup
-
-1. **Install PostgreSQL** and create a database:
-   ```sql
-   CREATE DATABASE pfin;
-   CREATE USER pfin_user WITH PASSWORD 'password';
-   GRANT ALL PRIVILEGES ON DATABASE pfin TO pfin_user;
-   ```
-
-2. **Update Database Configuration** in `src/main/resources/application.yml` if needed
-
-3. **Run the Application:**
+3. **Check Database Connection:**
    ```bash
-   mvn clean install
-   mvn spring-boot:run
+   # If using Docker database
+   docker exec postgres-pfin psql -U pfin_user -d pfin -c "SELECT COUNT(*) FROM categories;"
    ```
 
-### Application Configuration
+### 🐛 Troubleshooting
 
-The application will start on `http://localhost:8080` with the following default configuration:
+#### Common Issues
 
-- **Database**: PostgreSQL on localhost:5432
+**Java Version Issues:**
+```bash
+# Check current Java version
+java -version
+
+# If not Java 17, set correct environment
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+```
+
+**Database Connection Issues:**
+```bash
+# Check if PostgreSQL container is running
+docker ps | grep postgres
+
+# Check database logs
+docker logs postgres-pfin
+
+# Restart database if needed
+docker-compose restart db
+```
+
+**MapStruct Compilation Issues:**
+```bash
+# Clean and recompile to generate MapStruct implementations
+mvn clean compile
+
+# Check if generated classes exist
+ls target/generated-sources/annotations/com/finance/personalTracker/dto/
+```
+
+**Port Conflicts:**
+```bash
+# Check if port 8080 is in use
+lsof -i :8080
+
+# Kill process if needed
+kill -9 <PID>
+```
+
+### 📊 Application Configuration
+
+The application starts with these default settings:
+
+- **Port**: 8080
+- **Database**: PostgreSQL on localhost:5432 (local) or db:5432 (Docker)
 - **Database Name**: pfin
 - **Username**: pfin_user
 - **Password**: password
 - **Flyway**: Enabled with automatic migrations
+- **Profiles**: 
+  - `local` - For local development
+  - `docker` - For Docker environment
 
 ## 🧪 Testing
 
@@ -286,9 +496,11 @@ mvn test
 - **ORM**: Spring Data JPA with Hibernate
 - **Migration**: Flyway
 - **Validation**: Jakarta Validation API
-- **Mapping**: ModelMapper
+- **Mapping**: MapStruct + ModelMapper
 - **Build Tool**: Maven
 - **Java Version**: 17
+- **Containerization**: Docker & Docker Compose
+- **Profiles**: Spring Profiles (local, docker)
 
 ## 🚧 Future Improvements
 
